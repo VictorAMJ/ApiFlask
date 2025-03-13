@@ -145,7 +145,7 @@ def delete_aluno(idAluno):
 
 #TURMA:
 dicionarioTurma = {
-    'turma' = [{
+    "turma" : [{
         "id": 1,
         "descricao": "nenhuma",
         "professor_id": 1, ### descobrir como faz a ligação com id do professor
@@ -154,15 +154,54 @@ dicionarioTurma = {
 }
 
 #criar
-@app.route('/Turma', methods=['POST'])
+@app.route("/turma", methods=["POST"])
 def create_turma():
     dadosTurma = request.json
-    dici_turma = dicionarioTurma['turma']
+    dici_turma = dicionarioTurma["turma"]
     for turma in dici_turma:
         if turma["id"] == ["id"]:
-            
+            return jsonify({"erro":"ID já existente."}), 400
+        
+    turma = {
+        "id": dadosTurma["id"],
+        "descricao":dadosTurma["descricao"],
+        "professor_id":dadosTurma["professor_id"],
+        "ativo":dadosTurma["ativo"]
+    }
 
+    dicionarioTurma["turma"].append(turma)
+    return jsonify(turma), 201
 
+#ler
+@app.routa("/turma", methods=["GET"])
+def get_turma():
+    dadosTurma = dicionarioTurma["turma"]
+    return jsonify(dadosTurma)
+
+#atualizar
+@app.route("/turma/<int:idturma>", mathods=["PUT"])
+def atualizar_turma(idturma):
+    dici_turma = dicionarioTurma["turma"]
+    for turma in dici_turma:
+        if turma["id"] == idturma:
+            dadosturma = request.json
+            turma["id"] = dadosturma["id"]
+            turma["descricao"] = dadosturma["descricao"]
+            turma["professor_id"] = dadosturma["professor_id"]
+            turma["ativo"] = dadosturma["ativo"]
+            return jsonify(turma)
+    return jsonify({"erro": "Turma não encontrada."}), 404
+
+#deletar
+@app.route("/turma/<int:turma>", mathods=["DELETE"])
+def deletar_turma(idturma):
+    dici_turma = dicionarioTurma
+    for turma in dici_turma:
+        if turma["id"] == idturma:
+            dici_turma.remove(turma)
+            return jsonify({"mensagem": "Turma deletado com sucesso."}), 200
+    
+    return jsonify({"erro": "Professor não encontrado."}), 404
 
 if __name__=="__main__":
     app.run(debug=True)
