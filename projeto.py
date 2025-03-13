@@ -36,13 +36,13 @@ def create_professor():
     return jsonify(professor), 201
 
 #ler
-@app.route("/Professor", methods=["GET"])
+@app.route("/professor", methods=["GET"])
 def get_professor():
     dados = dicionarioProfessor["professores"]
     return jsonify(dados)
 
 #atualizar
-@app.route("/Professor/<int:idProfessor>", methods=["PUT"])
+@app.route("/professor/<int:idProfessor>", methods=["PUT"])
 def update_professor(idProfessor):
     dici_professores = dicionarioProfessor["professores"]
     for professor in dici_professores:
@@ -58,7 +58,7 @@ def update_professor(idProfessor):
     return jsonify({"erro": "Professor não encontrado"}), 404
 
 #deletar
-@app.route("/deletarProfessor/<int:idProfessor>", methods=["DELETE"])
+@app.route("/professor/<int:idProfessor>", methods=["DELETE"])
 def delete_professor(idProfessor):
     dici_professores = dicionarioProfessor["professores"]
     for professor in dici_professores:
@@ -84,7 +84,7 @@ dicionarioAluno = {
 }
 
 #criar
-@app.route("/Aluno", methods=["POST"])
+@app.route("/aluno", methods=["POST"])
 def create_aluno():
     dadosAluno = request.json
     dici_aluno = dicionarioAluno["aluno"]
@@ -107,13 +107,13 @@ def create_aluno():
     return jsonify(aluno), 201
 
 #ler
-@app.route("/Aluno", methods=["GET"])
+@app.route("/aluno", methods=["GET"])
 def get_aluno():
     dadosAlunos = dicionarioAluno["aluno"]
     return jsonify(dadosAlunos)
 
 #atualizar
-@app.route("/Aluno/<int:idAluno>", methods=["PUT"])
+@app.route("/aluno/<int:idAluno>", methods=["PUT"])
 def update_aluno(idAluno):
     dici_alunos = dicionarioAluno["aluno"]
     for aluno in dici_alunos:
@@ -132,7 +132,7 @@ def update_aluno(idAluno):
     return jsonify({"erro": "Aluno não encontrado"}), 404
 
 #deletar
-@app.route("/deletarAluno/<int:idAluno>", methods=["DELETE"])
+@app.route("/aluno/<int:idAluno>", methods=["DELETE"])
 def delete_aluno(idAluno):
     dici_aluno = dicionarioAluno["aluno"]
     for aluno in dici_aluno:
