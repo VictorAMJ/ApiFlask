@@ -4,7 +4,6 @@ app = Flask(__name__)
 
 
 #PROFESSOR:
-
 dicionarioProfessor = {
     "professores": [{
         "id": 1,
@@ -15,7 +14,33 @@ dicionarioProfessor = {
     }]
 }
 
-#criar:
+#ALUNO:
+dicionarioAluno = {
+    "aluno": [{
+        "id": 1,
+        "nome": "Jurema",
+        "idade": 43,
+        "turma_id": 1,
+        "data_nascimento":"15/06/1982",
+        "nota_primeiro_semestre": 6.0,
+        "nota_segundo_semestre": 8.0,
+        "media_final": 7.0
+    }]    
+}
+
+#TURMA:
+dicionarioTurma = {
+    "turma" : [{
+        "id": 1,
+        "descricao": "nenhuma",
+        "professor_id": 1, 
+        "ativo": True
+    }]
+}
+
+
+
+#CRIAR PROFESSOR:
 @app.route("/professor", methods=["POST"])
 def create_professor():
     dados = request.json
@@ -35,29 +60,37 @@ def create_professor():
     dicionarioProfessor["professores"].append(professor)
     return jsonify(professor), 201
 
-#ler
+
+#LER PROFESSOR
 @app.route("/professor", methods=["GET"])
 def get_professor():
     dados = dicionarioProfessor["professores"]
     return jsonify(dados)
 
-#atualizar
-@app.route("/professor/<int:idProfessor>", methods=["PUT"])
-def update_professor(idProfessor):
-    dici_professores = dicionarioProfessor["professores"]
-    for professor in dici_professores:
-        if professor["id"] == idProfessor:
-            dados = request.json
-            professor["id"] = dados["id"]
-            professor["nome"] = dados["nome"]
-            professor["idade"] = dados["idade"]
-            professor["materia"] = dados["materia"]
-            professor["observacoes"] = dados["observacoes"]
+#ATUALIZAR PROFESSOR
+@app.route("/professor/<int:idprofessor>", methods=["PUT"])
+def update_professor(idprofessor):
+    dici_professor = dicionarioProfessor["professores"]
+    
+    for professor in dici_professor:
+        if professor["id"] == idprofessor:
+            dadosprofessor = request.json
+
+            professor["id"] = dadosprofessor["id"]
+            professor["nome"] = dadosprofessor["nome"]
+            professor["idade"] = dadosprofessor["idade"]
+            professor["materia"] = dadosprofessor["materia"]
+            professor["observacoes"] = dadosprofessor["observacoes"]
+
             return jsonify(professor)
     
     return jsonify({"erro": "Professor não encontrado"}), 404
 
-#deletar
+
+
+
+
+#DELETAR PROFESSOR
 @app.route("/professor/<int:idProfessor>", methods=["DELETE"])
 def delete_professor(idProfessor):
     dici_professores = dicionarioProfessor["professores"]
@@ -69,28 +102,25 @@ def delete_professor(idProfessor):
     return jsonify({"erro": "Professor não encontrado."}), 404
 
 
-#ALUNO:
-dicionarioAluno = {
-    "aluno": [{
-        "id": 1,
-        "nome": "Jurema",
-        "idade": 43,
-        "turma_id":"ADS_3G", ### FAZER LIGAÇÃO COM O ID TURMA
-        "data_nascimento":"15/06/1982",
-        "nota_primeiro_semestre": 6.0,
-        "nota_segundo_semestre": 8.0,
-        "media_final": 7.0
-    }]    
-}
 
-#criar
+#CRIAR ALUNO
 @app.route("/aluno", methods=["POST"])
 def create_aluno():
     dadosAluno = request.json
     dici_aluno = dicionarioAluno["aluno"]
+
     for aluno in dici_aluno:
         if aluno["id"] == dadosAluno["id"]:
             return jsonify({"erro": "ID já existe."}), 400
+        
+    turma_existe = False
+    for turma in dicionarioTurma["turma"]:
+        if turma["id"] == dadosAluno["turma_id"]:
+            turma_existe = True
+            break
+
+    if not turma_existe:
+        return jsonify({"erro": "Turma não encontrada"}), 400
         
     aluno = {
         "id": dadosAluno["id"],
@@ -106,13 +136,15 @@ def create_aluno():
     dicionarioAluno["aluno"].append(aluno)
     return jsonify(aluno), 201
 
-#ler
+
+#LER ALUNO
 @app.route("/aluno", methods=["GET"])
 def get_aluno():
     dadosAlunos = dicionarioAluno["aluno"]
     return jsonify(dadosAlunos)
 
-#atualizar
+
+#ATUALIZAR ALUNO
 @app.route("/aluno/<int:idAluno>", methods=["PUT"])
 def update_aluno(idAluno):
     dici_alunos = dicionarioAluno["aluno"]
@@ -125,13 +157,14 @@ def update_aluno(idAluno):
             aluno["turma_id"] = dadosAluno["turma_id"]
             aluno["data_nascimento"] = dadosAluno["data_nascimento"]
             aluno["nota_primeiro_semestre"] = dadosAluno["nota_primeiro_semestre"]
-            aluno["nota_segundo_semestre"] = dadosAluno["nota_segundo_sememstre"]
+            aluno["nota_segundo_semestre"] = dadosAluno["nota_segundo_semestre"]
             aluno["media_final"] = dadosAluno["media_final"]
             return jsonify(aluno)
     
     return jsonify({"erro": "Aluno não encontrado"}), 404
 
-#deletar
+
+#DELETAR ALUNO
 @app.route("/aluno/<int:idAluno>", methods=["DELETE"])
 def delete_aluno(idAluno):
     dici_aluno = dicionarioAluno["aluno"]
@@ -143,24 +176,26 @@ def delete_aluno(idAluno):
     return jsonify({"erro": "Aluno não encontrado."}), 404
 
 
-#TURMA:
-dicionarioTurma = {
-    "turma" : [{
-        "id": 1,
-        "descricao": "nenhuma",
-        "professor_id": 1, ### descobrir como faz a ligação com id do professor
-        "ativo": True
-    }]
-}
 
-#criar
+#CRIAR TURMA
 @app.route("/turma", methods=["POST"])
 def create_turma():
     dadosTurma = request.json
     dici_turma = dicionarioTurma["turma"]
+
+    professor_existe = False
+    for professor in dicionarioProfessor["professores"]:
+        if professor["id"] == dadosTurma["professor_id"]:
+            professor_existe = True
+            break
+
+    if not professor_existe:
+        return jsonify({"erro": "Professor não encontrado"}), 400
+
+
     for turma in dici_turma:
-        if turma["id"] == ["id"]:
-            return jsonify({"erro":"ID já existente."}), 400
+        if turma["id"] == dadosTurma["id"]:
+            return jsonify({"erro": "ID já existente."}), 400
         
     turma = {
         "id": dadosTurma["id"],
@@ -172,36 +207,51 @@ def create_turma():
     dicionarioTurma["turma"].append(turma)
     return jsonify(turma), 201
 
-#ler
-@app.routa("/turma", methods=["GET"])
+
+#LER TURMA
+@app.route("/turma", methods=["GET"])
 def get_turma():
     dadosTurma = dicionarioTurma["turma"]
     return jsonify(dadosTurma)
 
-#atualizar
-@app.route("/turma/<int:idturma>", mathods=["PUT"])
-def atualizar_turma(idturma):
+
+#ATUALIZAR TURMA
+@app.route("/turma/<int:idturma>", methods=["PUT"])
+def update_turma(idturma):
     dici_turma = dicionarioTurma["turma"]
     for turma in dici_turma:
         if turma["id"] == idturma:
             dadosturma = request.json
-            turma["id"] = dadosturma["id"]
+
+            professor_existe = False
+            for prof in dicionarioProfessor["professores"]:
+                if prof["id"] == dadosturma["professor_id"]:
+                    professor_existe = True
+                    break
+
+            if not professor_existe:
+                return jsonify({"erro": "Professor não encontrado"}), 400
+            
             turma["descricao"] = dadosturma["descricao"]
             turma["professor_id"] = dadosturma["professor_id"]
             turma["ativo"] = dadosturma["ativo"]
             return jsonify(turma)
+        
     return jsonify({"erro": "Turma não encontrada."}), 404
 
-#deletar
-@app.route("/turma/<int:turma>", mathods=["DELETE"])
-def deletar_turma(idturma):
-    dici_turma = dicionarioTurma
+
+#DELETAR TURMA
+@app.route("/turma/<int:idturma>", methods=["DELETE"])
+def delete_turma(idturma):
+    dici_turma = dicionarioTurma["turma"]
     for turma in dici_turma:
         if turma["id"] == idturma:
             dici_turma.remove(turma)
             return jsonify({"mensagem": "Turma deletado com sucesso."}), 200
     
-    return jsonify({"erro": "Professor não encontrado."}), 404
+    return jsonify({"erro": "Turma não encontrada."}), 404
+
+
 
 if __name__=="__main__":
     app.run(debug=True)
