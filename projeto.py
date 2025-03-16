@@ -97,7 +97,7 @@ def delete_professor(idProfessor):
     for professor in dici_professores:
         if professor["id"] == idProfessor:
             dici_professores.remove(professor)
-            return jsonify({"mensagem": "Professor deletado com sucesso."}), 200
+            return jsonify({"mensagem": "Professor deletado com sucesso!"}), 200
     
     return jsonify({"erro": "Professor não encontrado."}), 404
 
