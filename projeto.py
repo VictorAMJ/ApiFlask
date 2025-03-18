@@ -177,7 +177,7 @@ def update_aluno(idAluno):
             aluno["media_final"] = dadosAluno["media_final"]
             return jsonify(aluno)
     
-    return jsonify({"erro": "Aluno não encontrado"}), 404
+    return jsonify({"erro": "Aluno não encontrado!"}), 404
 
 
 #DELETAR ALUNO
@@ -187,9 +187,9 @@ def delete_aluno(idAluno):
     for aluno in dici_aluno:
         if aluno["id"] == idAluno:
             dici_aluno.remove(aluno)
-            return jsonify({"mensagem": "Aluno deletado com sucesso."}), 200
+            return jsonify({"mensagem": "Aluno deletado com sucesso!"}), 200
     
-    return jsonify({"erro": "Aluno não encontrado."}), 404
+    return jsonify({"erro": "Aluno não encontrado!"}), 404
 
 
 
