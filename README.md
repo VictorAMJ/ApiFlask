@@ -1,3 +1,3 @@
 # ApiFlask
-Pincipal:
+Principal:
 Projeto de criação de API com Flask
