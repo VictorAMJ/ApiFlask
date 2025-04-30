@@ -1,5 +1,4 @@
-#IMPORTA MODEL DE PROFESSOR
-
+from professor.modelProfessor import dicionarioProfessor
 
 dicionarioTurma = {
     "turma" : [{
@@ -19,7 +18,7 @@ class ProfessorNãoEncontrado(Exception):
 class TurmaJáExiste(Exception):
     pass
 
-def create_turma(dadosTurma):
+def model_create_turma(dadosTurma):
     dici_turma = dicionarioTurma["turma"]
 
     professor_existe = False
@@ -43,20 +42,21 @@ def create_turma(dadosTurma):
     }
 
     dicionarioTurma["turma"].append(turma)
+    return turma
 
 
-def get_turma():
-    return  dicionarioTurma["turma"]
+def model_get_turma():
+    return dicionarioTurma["turma"]
 
 
-def get_turma_por_id(idturma):
+def model_get_turma_por_id(idturma):
     for turma in dicionarioTurma["turma"]:
         if turma["id"] == idturma:
             return turma
     raise TurmaNãoEncontrada('Turma não encontrada')
     
 
-def update_turma(idturma, dadosturma):
+def model_update_turma(idturma, dadosturma):
     dici_turma = dicionarioTurma["turma"]
     for turma in dici_turma:
         if turma["id"] == idturma:
@@ -78,11 +78,11 @@ def update_turma(idturma, dadosturma):
     raise TurmaNãoEncontrada('Turma não encontrada')
 
 
-def delete_turma(idturma):
+def model_delete_turma(idturma):
     dici_turma = dicionarioTurma["turma"]
     for turma in dici_turma:
         if turma["id"] == idturma:
             dici_turma.remove(turma)
+            return
     
     raise TurmaNãoEncontrada('Turma não encontrada')
-    
