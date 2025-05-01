@@ -1,13 +1,26 @@
-from professor.modelProfessor import dicionarioProfessor
+from Professor.modelProfessor import Professor
+from config import db
 
-dicionarioTurma = {
-    "turma" : [{
-        "id": 1,
-        "descricao": "nenhuma",
-        "professor_id": 1, 
-        "ativo": True
-    }]
-}
+class Turma(db.Model):
+    __tablename__ = "turma"
+
+    id = db.Column(db.Integer, primary_key=True)
+    descricao = db.Column(db.String(50), nullable=False)
+    ativo = db.Column(db.Boolean, nullable=False)
+    professor_id = db.Column(db.Integer, db.ForeignKey("professor.id"), nullable= False)
+
+    def __init__(self, descricao, ativo, professor_id):
+        self.descricao = descricao
+        self.ativo = ativo
+        self.professor_id = professor_id
+
+    def transforma_em_dic(self):
+        return{
+            'id':self.id,
+            'descricao': self.descricao,
+            'ativo': self.ativo,
+            'professor_id': self.professor_id
+        }
 
 class TurmaNãoEncontrada(Exception):
     pass
@@ -15,74 +28,62 @@ class TurmaNãoEncontrada(Exception):
 class ProfessorNãoEncontrado(Exception):
     pass
 
-class TurmaJáExiste(Exception):
-    pass
-
 def model_create_turma(dadosTurma):
-    dici_turma = dicionarioTurma["turma"]
-
-    professor_existe = False
-    for professor in dicionarioProfessor["professores"]:
-        if professor["id"] == dadosTurma["professor_id"]:
-            professor_existe = True
-            break
-
-    if not professor_existe:
+    professor = Professor.query.get(dadosTurma['professor_id'])
+    if (professor is None):
         raise ProfessorNãoEncontrado('Professor não encontrado')
+    
+    nova_turma = Turma(
+        descricao= dadosTurma['descricao'],
+        ativo= dadosTurma['ativo'],
+        professor_id= int(dadosTurma['professor_id'])
+    )
 
-    for turma in dici_turma:
-        if turma["id"] == dadosTurma["id"]:
-            raise TurmaJáExiste("Essa turma com esse ID, já existe")
-        
-    turma = {
-        "id": dadosTurma["id"],
-        "descricao":dadosTurma["descricao"],
-        "professor_id":dadosTurma["professor_id"],
-        "ativo":dadosTurma["ativo"]
-    }
-
-    dicionarioTurma["turma"].append(turma)
-    return turma
+    db.session.add(nova_turma)
+    db.session.commit()
+    return{"mensagem":"Turma adicionada com sucesso!"}, 201
 
 
 def model_get_turma():
-    return dicionarioTurma["turma"]
+    turmas = Turma.query.all()
+    print(turmas)
+    return [turma.transforma_em_dic() for turma in turmas]
 
 
 def model_get_turma_por_id(idturma):
-    for turma in dicionarioTurma["turma"]:
-        if turma["id"] == idturma:
-            return turma
-    raise TurmaNãoEncontrada('Turma não encontrada')
+    turma = Turma.query.get(idturma)
+    if not turma:
+        raise TurmaNãoEncontrada('Turma não encontrada')
+    return turma.transforma_em_dic()
     
 
-def model_update_turma(idturma, dadosturma):
-    dici_turma = dicionarioTurma["turma"]
-    for turma in dici_turma:
-        if turma["id"] == idturma:
-
-            professor_existe = False
-            for prof in dicionarioProfessor["professores"]:
-                if prof["id"] == dadosturma["professor_id"]:
-                    professor_existe = True
-                    break
-
-            if not professor_existe:
-                raise ProfessorNãoEncontrado('Professor não encontrado')
-            
-            turma["descricao"] = dadosturma["descricao"]
-            turma["professor_id"] = dadosturma["professor_id"]
-            turma["ativo"] = dadosturma["ativo"]
-            return turma
+def model_update_turma(idturma, dadosTurma):
+    turma = Turma.query.get(idturma)
+    if not turma:
+        raise TurmaNãoEncontrada('Turma não encontrada')
     
-    raise TurmaNãoEncontrada('Turma não encontrada')
+    professor = Professor.query.get(dadosTurma['professor_id'])
+    if (professor is None):
+        raise ProfessorNãoEncontrado('Professor não encontrado')
+    
+    turma.descricao = dadosTurma["descricao"]
+    turma.professor_id = dadosTurma["professor_id"]
+    turma.ativo = dadosTurma["ativo"]
+
+    db.session.commit()
+    return{
+        'id': turma.id,
+        'descricao': turma.descricao,
+        'ativo': turma.ativo,
+        'professor_id': turma.professor_id
+    }
 
 
 def model_delete_turma(idturma):
-    dici_turma = dicionarioTurma["turma"]
-    for turma in dici_turma:
-        if turma["id"] == idturma:
-            dici_turma.remove(turma)
-            return
+    turma = Turma.query.get(idturma)
+    if not turma:
+        raise TurmaNãoEncontrada('Turma não encontrada')
     
-    raise TurmaNãoEncontrada('Turma não encontrada')
+    db.session.delete(turma)
+    db.session.commit()
+    

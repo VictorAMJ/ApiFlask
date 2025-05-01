@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
-from .modelProfessor import (
+from datetime import datetime
+from config import db
+from Professor.modelProfessor import (
     ProfessorNaoEncontrado,
-    ProfessorJaExiste,
     model_create_professor,
     model_get_professor,
     model_get_professor_id,
@@ -13,12 +14,12 @@ professor = Blueprint('professor', __name__)
 
 @professor.route('/professor', methods = ['POST'])
 def create_professor():
-    dados = request.json
     try:
-        professor = model_create_professor(dados)
-        return jsonify(professor), 201
-    except ProfessorJaExiste:
-        return jsonify({'erro': 'ID já existe!'}), 400
+        dados = request.json
+        print(f"dados coletados: {dados}")
+        resposta, status_code = model_create_professor(dados)
+        return jsonify(resposta), status_code
+    
     except Exception as e:
         return jsonify({'erro': f'Erro inesperado ao criar professor: {str(e)}'}), 500
 
@@ -45,10 +46,13 @@ def get_professor_id(idprofessor):
 
 @professor.route('/professor/<int:idprofessor>', methods = ['PUT'])
 def update_professor(idprofessor):
+    dados = request.json
     try:
-        dados = request.json
-        professor_atualizado = model_update_professor(idprofessor, dados)
-        return jsonify(professor_atualizado)
+        professor = model_update_professor(idprofessor, dados)
+        if not professor:
+            return jsonify({'erro': 'Professor não encontrado!'}), 404
+        model_update_professor(idprofessor, dados)
+        return jsonify(dados), 200
     except ProfessorNaoEncontrado: 
         return jsonify({'erro': 'Professor não encontrado!'}), 404
     except Exception as e:

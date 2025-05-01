@@ -1,79 +1,116 @@
-dicionarioAluno = {
-    "aluno": [{
-        "id": 1,
-        "nome": "Jurema",
-        "idade": 43,
-        "turma_id": 1,
-        "data_nascimento":"15/06/1982",
-        "nota_primeiro_semestre": 6.0,
-        "nota_segundo_semestre": 8.0,
-        "media_final": 7.0
-    }]    
-}
+from Turma.modelTurma import Turma
+from datetime import datetime, date
+from config import db
+
+class Aluno(db.Model):
+    __tablename__ = "aluno"
+
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100), nullable=False)
+    data_nascimento = db.Column(db.Date, nullable=False)
+    idade = db.Column(db.Integer, nullable=False)
+    nota_primeiro_semestre = db.Column(db.Float, nullable=False)
+    nota_segundo_semestre = db.Column(db.Float, nullable=False)
+    media_final = db.Column(db.Float, nullable=False)
+    turma_id = db.Column(db.Integer, db.ForeignKey("turma.id"), nullable=False)
+
+    def __init__(self, nome, data_nascimento, nota_primeiro_semestre, nota_segundo_semestre, media_final, turma_id):
+        self.nome = nome
+        self.data_nascimento = data_nascimento
+        self.nota_primeiro_semestre = nota_primeiro_semestre
+        self.nota_segundo_semestre = nota_segundo_semestre
+        self.media_final = media_final
+        self.turma_id = turma_id
+        self.idade = self.calcular_idade()
+
+    def calcular_idade(self):
+        today = date.today()
+        return today.year - self.data_nascimento.year - ((today.month, today.day)< (self.data_nascimento.month, self.data_nascimento.day))
+    
+    def transforma_em_dic(self):
+        return{
+            'id': self.id,
+            'nome': self.nome,
+            'data_nascimento': self.data_nascimento.isoformat(),
+            'idade': self.idade,
+            'nota_primeiro_semestre': self.nota_primeiro_semestre,
+            'nota_segundo_semestre': self.nota_segundo_semestre,
+            'media_final': self.media_final,
+            'turma_id': self.turma_id
+        }
 
 class AlunoNaoEncontrado(Exception):
     pass
 
-class AlunoJaExiste(Exception):
+class TurmaNãoEncontrada(Exception):
     pass
 
-
 def model_create_aluno(dadosAluno):
-    dici_aluno = dicionarioAluno["aluno"]
-    for aluno in dici_aluno:
-        if aluno["id"] == dadosAluno["id"]:
-            raise AlunoJaExiste('Id já existente!')
-              
-    aluno = {
-        "id": dadosAluno["id"],
-        "nome": dadosAluno["nome"],
-        "idade": dadosAluno["idade"],
-        "turma_id": dadosAluno["turma_id"],
-        "data_nascimento": dadosAluno["data_nascimento"],
-        "nota_primeiro_semestre": dadosAluno["nota_primeiro_semestre"],
-        "nota_segundo_semestre": dadosAluno["nota_segundo_semestre"],
-        "media_final": dadosAluno["media_final"]
-    }
+    turma = Turma.query.get(dadosAluno['turma_id'])
+    if (turma is None):
+        raise TurmaNãoEncontrada('Turma não encontrada')
+    
+    novo_aluno = Aluno(
+        nome= dadosAluno["nome"],
+        data_nascimento= datetime.strptime(dadosAluno['data_nascimento'], "%Y-%m-%d").date(),
+        nota_primeiro_semestre= float(dadosAluno["nota_primeiro_semestre"]),
+        nota_segundo_semestre= float(dadosAluno["nota_segundo_semestre"]),
+        turma_id= int(dadosAluno["turma_id"]),
+        media_final= (float(dadosAluno["nota_primeiro_semestre"]) + float(dadosAluno["nota_segundo_semestre"]))/ 2
+    )
 
-    dicionarioAluno["aluno"].append(aluno)
-    return aluno
+    db.session.add(novo_aluno)
+    db.session.commit()
+    return{"mensagem":"Aluno adicionado com sucesso!"}, 201
 
 
 def model_get_aluno():
-    dadosAlunos = dicionarioAluno["aluno"]
-    return dadosAlunos
+    alunos = Aluno.query.all()
+    print(alunos)
+    return [aluno.transforma_em_dic() for aluno in alunos]
 
 
 def model_get_aluno_por_id(idAluno):
-    for aluno in dicionarioAluno["aluno"]:
-        if aluno["id"] == idAluno:
-            return aluno
-    raise AlunoNaoEncontrado('Aluno não Encontrado')
-
+    aluno = Aluno.query.get(idAluno)
+    if not aluno:
+        raise AlunoNaoEncontrado('Aluno não Encontrado')
+    return aluno.transforma_em_dic()
+   
 
 def model_update_aluno(idAluno, dadosAluno):
-    dici_alunos = dicionarioAluno["aluno"]
-    for aluno in dici_alunos:
-        if aluno["id"] == idAluno:
-
-            aluno["id"] = dadosAluno["id"]
-            aluno["nome"] = dadosAluno["nome"]
-            aluno["idade"] = dadosAluno["idade"]
-            aluno["turma_id"] = dadosAluno["turma_id"]
-            aluno["data_nascimento"] = dadosAluno["data_nascimento"]
-            aluno["nota_primeiro_semestre"] = dadosAluno["nota_primeiro_semestre"]
-            aluno["nota_segundo_semestre"] = dadosAluno["nota_segundo_semestre"]
-            aluno["media_final"] = dadosAluno["media_final"]
-            return aluno
+    aluno = Aluno.query.get(idAluno)
+    if not aluno:
+        raise AlunoNaoEncontrado('Aluno não Encontrado')
     
-    raise AlunoNaoEncontrado('Aluno não Encontrado')
+    turma = Turma.query.get(dadosAluno['turma_id'])
+    if (turma is None):
+        raise TurmaNãoEncontrada('Turma não encontrada')
+    
+    aluno.nome = dadosAluno["nome"]
+    aluno.turma_id = dadosAluno["turma_id"]
+    aluno.data_nascimento = datetime.strptime(dadosAluno["data_nascimento"], "%Y-%m-%d").date()
+    aluno.nota_primeiro_semestre = dadosAluno["nota_primeiro_semestre"]
+    aluno.nota_segundo_semestre = dadosAluno["nota_segundo_semestre"]
+    aluno.media_final = (float(dadosAluno["nota_primeiro_semestre"]) + float(dadosAluno["nota_segundo_semestre"]))/ 2
+    aluno.idade = aluno.calcular_idade()
 
+    db.session.commit()
+    return {
+        'id': aluno.id,
+        'nome': aluno.nome,
+        'data_nascimento': aluno.data_nascimento.isoformat(),
+        'idade': aluno.idade,
+        'nota_primeiro_semestre': aluno.nota_primeiro_semestre,
+        'nota_segundo_semestre': aluno.nota_segundo_semestre,
+        'media_final': aluno.media_final,
+        'turma_id': aluno.turma_id
+    }
+    
 
 def model_delete_aluno(idAluno):
-    dici_aluno = dicionarioAluno["aluno"]
-    for aluno in dici_aluno:
-        if aluno["id"] == idAluno:
-            dici_aluno.remove(aluno)
-            return
+    aluno = Aluno.query.get(idAluno)
+    if not aluno:
+        raise AlunoNaoEncontrado('Aluno não encontrado')
     
-    raise AlunoNaoEncontrado('Aluno não encontrado')
+    db.session.delete(aluno)
+    db.session.commit()

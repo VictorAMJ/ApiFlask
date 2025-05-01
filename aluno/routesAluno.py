@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
+from datetime import datetime
+from config import db
 from .modelAluno import(
     AlunoNaoEncontrado,
-    AlunoJaExiste,
     model_create_aluno,
     model_get_aluno,
     model_get_aluno_por_id,
@@ -13,12 +14,11 @@ aluno = Blueprint('aluno', __name__)
 
 @aluno.route("/aluno", methods=["POST"])
 def create_aluno():
-    dadosAluno = request.json
     try:
-        aluno = model_create_aluno(dadosAluno)
-        return jsonify(aluno), 201
-    except AlunoJaExiste:
-        return jsonify({"erro": "ID já existe"}), 400
+        dadosAluno = request.json
+        print(f"dados coletados: {dadosAluno}")
+        resposta, status_code = model_create_aluno(dadosAluno)
+        return jsonify(resposta), status_code
     except Exception as e:
         return jsonify({"erro": f"Erro indesperado ao criar aluno: {str(e)}"}), 500
     
@@ -45,10 +45,13 @@ def get_aluno_por_id(idAluno):
 
 @aluno.route("/aluno/<int:idAluno>", methods=["PUT"])
 def update_aluno(idAluno):
+    dadosAluno = request.json
     try:
-        dadosAluno = request.json
         aluno_atualizado = model_update_aluno(idAluno, dadosAluno)
-        return jsonify(aluno_atualizado)
+        if not aluno_atualizado:
+            return jsonify({'erro':'Aluno não encontrado'}), 404
+        model_update_aluno(idAluno, dadosAluno)
+        return jsonify(dadosAluno), 200
     except AlunoNaoEncontrado:
         return jsonify({"erro": "Aluno não encontrado!"}), 404
     except Exception as e:
@@ -64,4 +67,3 @@ def delete_aluno(idAluno):
         return jsonify({"mensagem": "Aluno não encontrado!"}), 404
     except Exception as e:
         return jsonify({"erro": f"Erro inesperado ao deletar alunos: {str(e)}"}), 500
-    
