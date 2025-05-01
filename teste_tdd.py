@@ -55,7 +55,7 @@ class TesteAPI(unittest.TestCase):
         resposta = requests.put(f"{URL}/professor/1", json={
             "nome": "Caio Silva",
             "data_nascimento": "1996-12-01",
-            "idade": "29",
+            "idade": "28",
             "materia": "Desenvolvimento Web",
             "observacoes": "Agora é especialista"
         })

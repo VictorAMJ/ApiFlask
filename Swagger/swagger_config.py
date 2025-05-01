@@ -1,7 +1,7 @@
 from . import api
-from swagger.namespaces.aluno_namespace import alunos_ns
-from swagger.namespaces.professor_namespaces import professores_ns
-from swagger.namespaces.turma_namespaces import turmas_ns
+from Swagger.namespaces.aluno_namespace import alunos_ns
+from Swagger.namespaces.professor_namespaces import professores_ns
+from Swagger.namespaces.turma_namespaces import turmas_ns
 
 def configure_swagger(app):
     api.init_app(app)
