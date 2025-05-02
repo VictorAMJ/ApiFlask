@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from config import db
-from .modelTurma import TurmaNãoEncontrada, model_create_turma, model_get_turma, model_get_turma_por_id, model_update_turma, model_delete_turma
+from turma.modelTurma import TurmaNãoEncontrada, model_create_turma, model_get_turma, model_get_turma_por_id, model_update_turma, model_delete_turma
 
 turma = Blueprint('turma', __name__)
 
