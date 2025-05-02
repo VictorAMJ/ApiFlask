@@ -1,5 +1,5 @@
 from flask_restx import Namespace, Resource, fields
-from Turma.modelTurma import model_create_turma, model_get_turma, model_get_turma_por_id, model_update_turma, model_delete_turma
+from turma.modelTurma import model_create_turma, model_get_turma, model_get_turma_por_id, model_update_turma, model_delete_turma
 
 turmas_ns = Namespace("Turmas", description="Operações relacionadas as turmas")
 
