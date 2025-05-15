@@ -81,6 +81,6 @@ A aplicação estará disponível em:
 
 ## 🧑‍💻 Autores
 
-Gabriela Araujo Rodrigues
-Victor Alexandre Martuzzo de Jesus
-Yara Castro Lima
+- Gabriela Araujo Rodrigues
+- Victor Alexandre Martuzzo de Jesus
+- Yara Castro Lima
