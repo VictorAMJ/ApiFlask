@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from datetime import datetime
 from config import db
-from professor.modelProfessor import (
+from Professor.modelProfessor import (
     ProfessorNaoEncontrado,
     model_create_professor,
     model_get_professor,

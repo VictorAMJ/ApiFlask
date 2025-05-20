@@ -7,27 +7,20 @@ class Professor(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(50), nullable=False)
-    data_nascimento = db.Column(db.Date, nullable=False)
-    idade = db.Column(db.Integer, nullable=False)
-    materia = db.Column(db.String, nullable=False)
-    observacoes = db.Column(db.String, nullable=False)
+    idade = db.Column(db.String(10), nullable=False)
+    materia = db.Column(db.String(50), nullable=False)
+    observacoes = db.Column(db.String(100), nullable=False)
 
-    def __init__(self, nome, data_nascimento, materia, observacoes):
+    def __init__(self, nome, idade, materia, observacoes):
         self.nome = nome
-        self.data_nascimento = data_nascimento
+        self.idade = idade
         self.materia = materia
         self.observacoes = observacoes
-        self.idade = self.calcular_idade()
-
-    def calcular_idade(self):
-        today = date.today()
-        return today.year - self.data_nascimento.year - ((today.month, today.day)< (self.data_nascimento.month, self.data_nascimento.day))
     
     def transforma_em_dic(self):
         return{
             'id': self.id,
             'nome': self.nome,
-            'data_nascimento': self.data_nascimento.isoformat(),
             'idade': self.idade,
             'materia': self.materia,
             'observacoes': self.observacoes
@@ -39,7 +32,7 @@ class ProfessorNaoEncontrado(Exception):
 def model_create_professor(dados):
     novo_professor = Professor(
         nome= dados["nome"],
-        data_nascimento= datetime.strptime(dados['data_nascimento'], "%Y-%m-%d").date(),
+        idade = dados["idade"],
         materia= dados["materia"],
         observacoes= dados["observacoes"]
     )
@@ -68,19 +61,17 @@ def model_update_professor(idprofessor, dados_novos):
         raise ProfessorNaoEncontrado("Professor não encontrado.")
     
     professor.nome = dados_novos["nome"]
-    professor.data_nascimento = datetime.strptime(dados_novos["data_nascimento"], "%Y-%m-%d").date()
+    professor.idade = dados_novos["idade"]
     professor.materia = dados_novos["materia"]
     professor.observacoes = dados_novos["observacoes"]
-    professor.idade = professor.calcular_idade()
 
     db.session.commit()
     return {
         "id": professor.id,
         "nome": professor.nome,
-        "data_nascimento": str(professor.data_nascimento),
+        "idade": professor.idade,
         "materia": professor.materia,
-        "observacoes": professor.observacoes,
-        "idade": professor.idade
+        "observacoes": professor.observacoes
     }
 
 
@@ -91,4 +82,3 @@ def model_delete_professor(idProfessor):
     
     db.session.delete(professor)
     db.session.commit()
-

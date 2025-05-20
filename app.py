@@ -1,8 +1,8 @@
 from Swagger.swagger_config import configure_swagger
 from config import app, db
-from professor.routesProfessor import professor
-from aluno.routesAluno import aluno
-from turma.routesTurma import turma
+from Professor.routesProfessor import professor
+from Aluno.routesAluno import aluno
+from Turma.routesTurma import turma
 
 
 app.register_blueprint(professor)

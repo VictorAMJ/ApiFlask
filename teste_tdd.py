@@ -7,7 +7,7 @@ class TesteAPI(unittest.TestCase):
     def reset_dados_professor(self):
         requests.post(f"{URL}/professor", json={
             "nome": "Caio",
-            "data_nascimento": "1997-04-21",
+            "idade": "28",
             "materia": "Desenvolvimento de APIs e Microsserviços",
             "observacoes": "Professor legal"
         })
@@ -34,7 +34,7 @@ class TesteAPI(unittest.TestCase):
     def teste01_criar_professor(self):
         resposta = requests.post(f"{URL}/professor", json={
             "nome": "Ana",
-            "data_nascimento": "1989-03-10",
+            "idade": "27",
             "materia": "Matemática",
             "observacoes": "Muito experiente"
         })
@@ -54,7 +54,6 @@ class TesteAPI(unittest.TestCase):
     def teste04_atualizar_professor(self):
         resposta = requests.put(f"{URL}/professor/1", json={
             "nome": "Caio Silva",
-            "data_nascimento": "1996-12-01",
             "idade": "28",
             "materia": "Desenvolvimento Web",
             "observacoes": "Agora é especialista"

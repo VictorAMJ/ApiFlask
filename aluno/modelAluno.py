@@ -1,4 +1,4 @@
-from turma.modelTurma import Turma
+from Turma.modelTurma import Turma
 from datetime import datetime, date
 from config import db
 
